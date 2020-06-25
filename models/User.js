@@ -1,3 +1,4 @@
+const usersCollection = require('../db').collection("users") // the db.js file exports the whole database, where we have multiple collections. in this application we want to use the users collection.
 const validator = require('validator')
 
 let User = function(data) {
@@ -38,6 +39,9 @@ User.prototype.register = function() {
     this.validate()
 
     // Step #2: Only if there are no validation errors, then safe the data into a database
+    if (!this.errors.length) {
+        usersCollection.insertOne(this.data)
+    }
 }
 
 module.exports = User
