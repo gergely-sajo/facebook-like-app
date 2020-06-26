@@ -1,3 +1,4 @@
+const bcrypt = require('bcryptjs')
 const usersCollection = require('../db').collection("users") // the db.js file exports the whole database, where we have multiple collections. in this application we want to use the users collection.
 const validator = require('validator')
 
@@ -30,14 +31,14 @@ User.prototype.validate = function() {
 
     if (this.data.password == "") {this.errors.push("You must provide a password!")}
     if (this.data.password.length > 0 && this.data.password.length < 12) {this. errors.push("Password must be at least 12 characters.")}
-    if (this.data.password.length > 100) {this. errors.push("Password cannot exceed 100 characters.")}
+    if (this.data.password.length > 50) {this. errors.push("Password cannot exceed 50 characters.")}
 }
 
 User.prototype.login = function() {
     return new Promise((resolve, reject) => {
         this.cleanUp()
         usersCollection.findOne({username: this.data.username}).then((attemptedUser) => {
-            if (attemptedUser && attemptedUser.password == this.data.password) {
+            if (attemptedUser && bcrypt.compareSync(this.data.password, attemptedUser.password)) {
                 resolve("Success")
             } else {
                 reject("Invalid username / password")
@@ -55,6 +56,10 @@ User.prototype.register = function() {
 
     // Step #2: Only if there are no validation errors, then safe the data into a database
     if (!this.errors.length) {
+        // Hash user passwords
+        let salt = bcrypt.genSaltSync(10)
+        this.data.password = bcrypt.hashSync(this.data.password, salt)
+
         usersCollection.insertOne(this.data)
     }
 }
