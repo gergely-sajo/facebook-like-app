@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs')
-const usersCollection = require('../db').collection("users") // the db.js file exports the whole database, where we have multiple collections. in this application we want to use the users collection.
+const usersCollection = require('../db').db().collection("users") // the db.js file exports the whole database, where we have multiple collections. in this application we want to use the users collection.
 const validator = require('validator')
 
 let User = function(data) {
