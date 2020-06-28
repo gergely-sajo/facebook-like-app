@@ -19,6 +19,12 @@ let sessionOptions = session({
 app.use(sessionOptions)
 app.use(flash())
 
+// adding a 'user' object to the local ejs object of 'locals'. so every ejs template has access to the 'user' object
+app.use(function(req, res, next) {
+    res.locals.user = req.session.user
+    next()
+})
+
 const router = require('./router')
 
 app.use(express.urlencoded({extended: false})) // have toconfigure the express app for the userController to be able to understand the input. It basically only tells express to add the user-submitted data onto our request object
