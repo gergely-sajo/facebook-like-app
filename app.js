@@ -21,6 +21,10 @@ app.use(flash())
 
 // adding a 'user' object to the local ejs object of 'locals'. so every ejs template has access to the 'user' object
 app.use(function(req, res, next) {
+    // make current user id available on the req object
+    if (req.session.user) {req.visitorId = req.session.user._id} else {req.visitorId = 0}
+
+    // make user session data available from within view templates
     res.locals.user = req.session.user
     next()
 })
