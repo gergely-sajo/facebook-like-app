@@ -13,7 +13,7 @@
       
     <p class="text-muted small mb-4">
       <a href="#"><img class="avatar-tiny" src="<%= post.author.avatar %>"></a>
-      Posted by <a href="#"><%= post.author.username %></a> <%= post.createdDate.getMonth() + 1 %>/<%= post.createdDate.getDate() %>/<%= post.createdDate.getFullYear() %></p>
+      Posted by <a href="/profile/<%= user.username %>"><%= post.author.username %></a> <%= post.createdDate.getMonth() + 1 %>/<%= post.createdDate.getDate() %>/<%= post.createdDate.getFullYear() %></p>
 
     <div class="body-content">
       <%= post.body %>
