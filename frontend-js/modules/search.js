@@ -1,4 +1,5 @@
 import axios from 'axios' // an npm package sending off asynchronous requests
+import dompurify from 'dompurify'
 
 export default class Search {
     // 1. Select DOM elements and keep track of any usefule data
@@ -58,7 +59,7 @@ export default class Search {
 
     renderResultsHTML(posts) {
         if (posts.length) {
-            this.resultsArea.innerHTML = `
+            this.resultsArea.innerHTML = dompurify.sanitize(`
             <div class="list-group shadow-sm">
             <div class="list-group-item active"><strong>Search Results</strong> (${posts.length > 1 ? `${posts.length} items found` : '1 item found'})</div>
             ${posts.map(post => {
@@ -71,7 +72,7 @@ export default class Search {
                 `
             }).join('')}
           </div>
-            `
+            `)
         } else {
             this.resultsArea.innerHTML = `<p class="alert alert-danger text-center shadow-sm">Sorry, we could not find any results for that search.</p>`
         }
