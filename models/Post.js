@@ -89,11 +89,12 @@ Post.reusablePostQuery = function(uniqueOperations, visitorId) {
             }}
         ])
 
-        let posts = await postsCollection.aggregate(aggOperations).toArray()
+        let posts = await postsCollection.aggregate(aggOperations).toArray() // Aggregation operations process data records and return computed results. Aggregation operations group values from multiple documents together, and can perform a variety of operations on the grouped data to return a single result.
 
         // Clean up author property in each post object
         posts = posts.map(function(post) {
             post.isVisitorOwner = post.authorId.equals(visitorId)
+            post.authorId = undefined
 
             post.author = {
                 username: post.author.username,
@@ -143,6 +144,20 @@ Post.delete = function(postIdToDelete, currentUserId) {
                 reject()
             }
         } catch {
+            reject()
+        }
+    })
+}
+
+Post.search = function(searchTerm) {
+    return new Promise(async (resolve, reject) => {
+        if (typeof(searchTerm == "string")) {
+            let posts = await Post.reusablePostQuery([
+                {$match: {$text: {$search: searchTerm}}}, // for the searchTerm or query scan we have to create a new set of indexes with title and body texts on the mongodb interface.
+                {$sort: {score: {$meta: "textScore"}}}
+            ])
+            resolve(posts)
+        } else {
             reject()
         }
     })
