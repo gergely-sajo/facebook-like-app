@@ -79,8 +79,8 @@ Post.prototype.actuallyUpdate = function() {
 Post.reusablePostQuery = function(uniqueOperations, visitorId) {
     return new Promise(async function(resolve, reject) {
         let aggOperations = uniqueOperations.concat([
-            {$lookup: {from: "users", localField: "author", foreignField: "_id", as: "authorDocument"}},
-            {$project: {
+            {$lookup: {from: "users", localField: "author", foreignField: "_id", as: "authorDocument"}}, //the lookup returns a new object with an extra property (which is going to be an array) named, in this case, authorDocument. from: is the collection we want to have data from. localField: which field in the users doc we want to perform the lookup. foreignField: inside the from where the localField matches the foreignField. as: how do we want to call it.
+            {$project: { // we can specify which data should exist within the object that the aggregate returns
                 title: 1,
                 body: 1,
                 createdDate: 1,

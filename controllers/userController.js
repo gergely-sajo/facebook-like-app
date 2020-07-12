@@ -83,7 +83,7 @@ exports.profilePostsScreen = function(req, res) {
     })
 }
 
-exports.sharedProfileData = async function(req, res, next) {
+exports.sharedProfileData = async function(req, res, next) { // Here we check whether the user is viewing its own profile and whether the user is following the user of the profile which is currently viewed. Depending on that we show different buttons on a profile screen
     let isVisitorsProfile = false
     let isFollowing = false
 
@@ -95,4 +95,19 @@ exports.sharedProfileData = async function(req, res, next) {
     req.isVisitorsProfile = isVisitorsProfile
     req.isFollowing = isFollowing
     next()
+}
+
+exports.profileFollowersScreen = async function(req, res) {
+    try {
+        let followers = await Follow.getFollowersById(req.profileUser._id)
+        res.render('profile-followers', {
+            followers: followers,
+            profileUsername: req.profileUser.username,
+            profileAvatar: req.profileUser.avatar,
+            isFollowing: req.isFollowing,
+            isVisitorsProfile: req.isVisitorsProfile
+        })
+    } catch {
+        res.render('404')
+    }
 }
