@@ -56,10 +56,20 @@ const server = require('http').createServer(app)
 
 const io = require('socket.io')(server)
 
+io.use(function(socket, next) {
+    sessionOptions(socket.request, socket.request.res, next)
+})
+
 io.on('connection', function(socket) {
-    socket.on('chatMessageFromBrowser', function(data) {
-        io.emit('chatMessageFromServer', {message: data.message})
-    })
+    if (socket.request.session.user) {
+        let user = socket.request.session.user
+
+        socket.emit('welcome', {username: user.username, avatar: user.avatar})
+
+        socket.on('chatMessageFromBrowser', function(data) {
+            socket.broadcast.emit('chatMessageFromServer', {message: sanitizeHTML(data.message, {allowedTags: [], allowedAttributes: {}}), username: user.username, avatar: user.avatar}) // if we say io.emit() then it will send the message out to all users. if we say socket.broadcast it will send the message out every user, except the one who sent it
+        })
+    }
 })
 
 module.exports = server // we dont start our app from this file anymore, just exporting the express app, therefore the db.js file can start the app after the connection to the database is established
