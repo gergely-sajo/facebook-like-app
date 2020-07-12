@@ -1,5 +1,5 @@
 const usersCollecion = require('../db').db().collection("users")
-const followsCollecion = require('../db').db().collection("follows")
+const followsCollection = require('../db').db().collection("follows")
 const ObjectID = require('mongodb').ObjectID
 const User = require('./User')
 
@@ -24,7 +24,7 @@ Follow.prototype.validate = async function(action) {
         this.errors.push("You cannot follow a user that does not exist.")
     }
 
-    let doesFollowAlreadyExist = await followsCollecion.findOne({followedId: this.followedId, authorId: new ObjectID(this.authorId)})
+    let doesFollowAlreadyExist = await followsCollection.findOne({followedId: this.followedId, authorId: new ObjectID(this.authorId)})
     
     if (action == "create") {
         if (doesFollowAlreadyExist) {
@@ -49,7 +49,7 @@ Follow.prototype.create = function() {
         this.cleanUp()
         await this.validate("create")
         if (!this.errors.length) {
-            await followsCollecion.insertOne({followedId: this.followedId, authorId: new ObjectID(this.authorId)})
+            await followsCollection.insertOne({followedId: this.followedId, authorId: new ObjectID(this.authorId)})
             resolve()
         } else {
             reject(this.errors)
@@ -62,7 +62,7 @@ Follow.prototype.delete = function() {
         this.cleanUp()
         await this.validate("delete")
         if (!this.errors.length) {
-            await followsCollecion.deleteOne({followedId: this.followedId, authorId: new ObjectID(this.authorId)})
+            await followsCollection.deleteOne({followedId: this.followedId, authorId: new ObjectID(this.authorId)})
             resolve()
         } else {
             reject(this.errors)
@@ -71,7 +71,7 @@ Follow.prototype.delete = function() {
 }
 
 Follow.isVisitorFollowing = async function(followedId, visitorId) {
-    let followDoc = await followsCollecion.findOne({followedId: followedId, authorId: new ObjectID(visitorId)})
+    let followDoc = await followsCollection.findOne({followedId: followedId, authorId: new ObjectID(visitorId)})
     if (followDoc) {
         return true
     } else {
@@ -82,7 +82,7 @@ Follow.isVisitorFollowing = async function(followedId, visitorId) {
 Follow.getFollowersById = function(id) {
     return new Promise(async (resolve, reject) => {
         try {
-            let followers = await followsCollecion.aggregate([
+            let followers = await followsCollection.aggregate([
                 {$match: {followedId: id}},
                 {$lookup: {from: "users", localField: "authorId", foreignField: "_id", as: "userDoc"}},
                 {$project: {
@@ -106,7 +106,7 @@ Follow.getFollowersById = function(id) {
 Follow.getFollowingById = function(id) {
     return new Promise(async (resolve, reject) => {
         try {
-            let following = await followsCollecion.aggregate([
+            let following = await followsCollection.aggregate([
                 {$match: {authorId: id}},
                 {$lookup: {from: "users", localField: "followedId", foreignField: "_id", as: "userDoc"}},
                 {$project: {
@@ -124,6 +124,20 @@ Follow.getFollowingById = function(id) {
         } catch {
             reject()
         }
+    })
+}
+
+Follow.countFollowersById = function(id) {
+    return new Promise(async (resolve, reject) => {
+        let followerCount = await followsCollection.countDocuments({followedId: id})
+        resolve(followerCount)
+    })
+}
+
+Follow.countFollowingById = function(id) {
+    return new Promise(async (resolve, reject) => {
+        let followingCount = await followsCollection.countDocuments({authorId: id})
+        resolve(followingCount)
     })
 }
 
