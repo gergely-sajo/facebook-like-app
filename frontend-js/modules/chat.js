@@ -28,7 +28,7 @@ export default class Chat {
     }
 
     openConnection() {
-        alert("Opening a connection")
+        this.socket = io() // the JS file in the footer makes the io available. It opens a connection between the browser and the server
     }
 
     injectHTML() {

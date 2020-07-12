@@ -51,4 +51,13 @@ app.set('view engine', 'ejs') // we have to let express know which template engi
 
 app.use('/', router)
 
-module.exports = app // we dont start our app from this file anymore, just exporting the express app, therefore the db.js file can start the app after the connection to the database is established
+// we have to configure the server to be an express app and to power socket connections at the same time
+const server = require('http').createServer(app)
+
+const io = require('socket.io')(server)
+
+io.on('connection', function() {
+    console.log("A new user connected")
+})
+
+module.exports = server // we dont start our app from this file anymore, just exporting the express app, therefore the db.js file can start the app after the connection to the database is established
