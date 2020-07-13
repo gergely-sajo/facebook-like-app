@@ -1,3 +1,5 @@
+import axios from 'axios'
+
 export default class RegistrationForm {
     constructor() {
         this.allFields = document.querySelectorAll("#registration-form .form-control")
@@ -52,6 +54,19 @@ export default class RegistrationForm {
     usernameAfterDelay() {
         if (this.username.value.length < 3) {
             this.showValidationError(this.username, "Username must be at least 3 characters!")
+        }
+
+        if (!this.username.errors) {
+            axios.post('/doesUsernameExist', {username: this.username.value}).then((response) => {
+                if (response.data) {
+                    this.showValidationError(this.username, "That username is already taken!")
+                    this.username.isUnique = false
+                } else {
+                    this.username.isUnique = true
+                }
+            }).catch(() =>  {
+                console.log("please try again.")
+            })
         }
     }
 

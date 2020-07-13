@@ -2,6 +2,14 @@ const User = require('../models/User')
 const Post = require('../models/Post')
 const Follow = require('../models/Follow')
 
+exports.doesUsernameExist = function(req, res) {
+    User.findByUserName(req.body.username).then(function() {
+        res.json(true)
+    }).catch(function() {
+        res.json(false)
+    })
+}
+
 exports.mustBeLoggedIn = function(req, res, next) {
     if (req.session.user) {
         next()
