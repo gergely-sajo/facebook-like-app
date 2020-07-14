@@ -6,6 +6,8 @@ export default class RegistrationForm {
         this.insertValidationElements()
         this.username = document.querySelector("#username-register")
         this.username.previousValue = ""
+        this.email = document.querySelector("#email-register")
+        this.email.previousValue = ""
         this.events()
     }
 
@@ -13,6 +15,10 @@ export default class RegistrationForm {
     events() {
         this.username.addEventListener("keyup", () => {
             this.isDifferent(this.username, this.usernameHandler)
+        })
+
+        this.email.addEventListener("keyup", () => {
+            this.isDifferent(this.email, this.emailHandler)
         })
     }
 
@@ -34,7 +40,7 @@ export default class RegistrationForm {
         this.username.errors = false
         this.usernameImmediately() // checking for immediate errors (non alphanumeric character, spaces etc.)
         clearTimeout(this.username.timer)
-        this.username.timer = setTimeout(() => this.usernameAfterDelay(), 3000) // checking for not immediate errors
+        this.username.timer = setTimeout(() => this.usernameAfterDelay(), 800) // checking for not immediate errors
     }
 
     usernameImmediately() {
@@ -66,6 +72,32 @@ export default class RegistrationForm {
                 }
             }).catch(() =>  {
                 console.log("please try again.")
+            })
+        }
+    }
+
+    emailHandler() {
+        this.email.errors = false
+        clearTimeout(this.email.timer)
+        this.email.timer = setTimeout(() => this.emailAfterDelay(), 800)
+    }
+
+    emailAfterDelay() {
+        if (!/^\S+@\S+$/.test(this.email.value)) {
+            this.showValidationError(this.email, "You must provide a valid email address!")
+        }
+
+        if (!this.email.errors) {
+            axios.post('/doesEmailExist', {email: this.email.value}).then((response) => {
+                if (response.data) {
+                    this.email.isUnique = false
+                    this.showValidationError(this.email, "That email address is already being used.")
+                } else {
+                    this.email.isUnique = true
+                    this.hideValidationError(this.email)
+                }
+            }).catch(() => {
+                console.log("Please try again later.")
             })
         }
     }
