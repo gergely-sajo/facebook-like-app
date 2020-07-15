@@ -3,8 +3,15 @@ const session = require('express-session')
 const MongoStore = require('connect-mongo')(session)
 const flash = require('connect-flash')
 const markdown = require('marked')
+const csrf = require('csurf')
 const app = express()
 const sanitizeHTML = require('sanitize-html')
+
+app.use(express.urlencoded({extended: false})) // have toconfigure the express app for the userController to be able to understand the input. It basically only tells express to add the user-submitted data onto our request object
+app.use(express.json())
+
+// API router
+app.use('/api', require('./router-api')) // none of the below app.use() code will be applied to these routes because it is above them
 
 // Session Configuration Options
 let sessionOptions = session({
@@ -42,14 +49,29 @@ app.use(function(req, res, next) {
 
 const router = require('./router')
 
-app.use(express.urlencoded({extended: false})) // have toconfigure the express app for the userController to be able to understand the input. It basically only tells express to add the user-submitted data onto our request object
-app.use(express.json())
-
 app.use(express.static('public'))
 app.set('views', 'views') // the first argument has to be 'views', but the second argument should be the name of the folder of our view files, .ejs files
 app.set('view engine', 'ejs') // we have to let express know which template engine or templating system we are using
 
+app.use(csrf()) // any request that modify state are need to have a valid and matching csrf token or else the rquest will be rejected and throw an error
+
+app.use(function(req, res, next) { // make the csrf available within our html (ejs) templates
+    res.locals.csrfToken = req.csrfToken()
+    next()
+})
+
 app.use('/', router)
+
+app.use(function(err, req, res, next) {
+    if (err) {
+        if (err.code == "EBADCSRFTOKEN") {
+            req.flash("errors", "Cross site request forgery detected.")
+            req.session.save(() => res.redirect('/'))
+        } else {
+            res.render('404')
+        }
+    }
+})
 
 // we have to configure the server to be an express app and to power socket connections at the same time
 const server = require('http').createServer(app)
