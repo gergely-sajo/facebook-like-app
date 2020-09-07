@@ -40,7 +40,8 @@ User can follow and unfollow each other. Users who follow other users will see p
 By clicking on the profile picture or icon users can go to their user profile page. Here they can see all of their own posts, followers and other users who follow them. This is automatically refreshed by changes in these values.
 
 ## Stack used
-- ejs
+- HTML
+- EJS
 - Bootstrap
 - Javascript
 - Node.js
